@@ -1,0 +1,33 @@
+package com.guitu18.beans;
+
+import org.apache.log4j.Logger;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * GTIoc
+ *
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class GTIoc {
+
+    private Logger log = Logger.getLogger(this.getClass());
+
+    private static Map<String, Object> beanMap = new ConcurrentHashMap<String, Object>();
+
+    public static void register(Object object) {
+        beanMap.put(object.getClass().getName(), object);
+    }
+
+    public static Object getBean(String name) throws Exception {
+        return beanMap.get(name);
+    }
+
+    public static <T> T getBean(Class<T> clazz) throws Exception {
+        return (T) getBean(clazz.getName());
+    }
+
+
+}

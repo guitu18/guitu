@@ -1,0 +1,42 @@
+package com.guitu18.beans;
+
+import com.guitu18.reflect.ClassScanner;
+import org.apache.log4j.Logger;
+
+import java.util.Set;
+
+/**
+ * BeanManager
+ *
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class BeanManager {
+
+    private Logger log = Logger.getLogger(this.getClass());
+
+    private static BeanManager beanManager;
+
+    private BeanManager() {
+    }
+
+    public static BeanManager getInstance() {
+        if (beanManager == null) {
+            synchronized (BeanManager.class) {
+                if (beanManager == null) {
+                    beanManager = new BeanManager();
+                }
+            }
+        }
+        return beanManager;
+    }
+
+    public void initBean(String packageName) throws IllegalAccessException, InstantiationException {
+        Set<Class> classes = ClassScanner.getClasses(packageName);
+        for (Class clazz : classes) {
+            Ioc.register(clazz.newInstance());
+        }
+    }
+
+
+}

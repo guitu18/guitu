@@ -1,0 +1,19 @@
+package com.guitu18;
+
+import com.guitu18.beans.BeanManager;
+import com.guitu18.bootstrap.NettyBootstrap;
+
+/**
+ * 服务启动类
+ *
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class MyServer {
+
+    public static void main(String[] args) throws Exception {
+        BeanManager.getInstance().initBean("com.guitu18.controller");
+        NettyBootstrap.start();
+    }
+
+}

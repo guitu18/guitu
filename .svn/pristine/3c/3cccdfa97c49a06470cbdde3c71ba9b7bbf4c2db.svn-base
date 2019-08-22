@@ -1,0 +1,16 @@
+package com.guitu18.config;
+
+/**
+ * Web相关配置
+ *
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class WebConfig {
+
+    /**
+     * 服务端口号
+     */
+    public static final int SERVER_PORT = 8888;
+
+}

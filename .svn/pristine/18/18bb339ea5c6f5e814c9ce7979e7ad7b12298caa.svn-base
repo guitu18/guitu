@@ -1,0 +1,46 @@
+import com.guitu18.core.interceptor.HandlerInterceptor;
+import com.guitu18.core.reflect.ClassScanner;
+import com.guitu18.module.interceptor.MyInterceptor;
+import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class ClassScannerTest {
+
+    public String say(String name) {
+        System.out.println("name = " + name);
+        return "hello world";
+    }
+
+    @Test
+    public void test1() {
+        Set<Class> set = new HashSet<Class>();
+        ClassScanner.scanner("com.guitu18", set);
+        System.out.println("set = " + set);
+    }
+
+    @Test
+    public void test2() {
+        MyInterceptor interceptor = new MyInterceptor();
+        boolean insss = interceptor instanceof HandlerInterceptor;
+        System.out.println("b = " + insss);
+    }
+
+    @Test
+    public void test3() throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+        Class<ClassScannerTest> clazz = ClassScannerTest.class;
+        Method method = clazz.getMethod("say", String.class);
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Object[] args = new Object[]{123};
+        Object invoke = method.invoke(clazz.newInstance(), args);
+        System.out.println("invoke = " + invoke);
+    }
+
+}

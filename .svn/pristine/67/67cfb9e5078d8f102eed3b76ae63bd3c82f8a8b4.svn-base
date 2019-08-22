@@ -1,0 +1,29 @@
+import com.guitu18.core.interceptor.HandlerInterceptor;
+import com.guitu18.core.reflect.ClassScanner;
+import com.guitu18.module.interceptor.MyInterceptor;
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class ClassScannerTest {
+
+    @Test
+    public void test1() {
+        Set<Class> set = new HashSet<Class>();
+        ClassScanner.scanner("com.guitu18", set);
+        System.out.println("set = " + set);
+    }
+
+    @Test
+    public void test2(){
+        MyInterceptor interceptor = new MyInterceptor();
+        boolean insss = interceptor instanceof HandlerInterceptor;
+        System.out.println("b = " + insss);
+    }
+
+}
