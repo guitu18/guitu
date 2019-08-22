@@ -1,4 +1,0 @@
-#服务端口
-web.serverPort=8888
-#扫描包名称
-web.packageScan=
