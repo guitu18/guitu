@@ -1,0 +1,129 @@
+package com.guitu18.reflect;
+
+import com.guitu18.annonation.GTRequestMapping;
+import com.guitu18.mapping.GTHandlerMethodMapping;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.*;
+
+/**
+ * @author zhangkuan
+ * @date 2019/8/19
+ */
+public class ClassScanner {
+
+    private static Logger log = Logger.getLogger(ClassScanner.class);
+
+    private static Map<String, Class<?>> classMap = null;
+
+    private static Set<Class> classes = null;
+
+    /**
+     * 获取Class
+     *
+     * @param className
+     * @return
+     */
+    public static Class<?> getClass(String className) {
+        return classMap.get(className);
+    }
+
+    /**
+     * 获取Class集合
+     *
+     * @param packageName
+     * @return
+     */
+    public static Set<Class> getClasses(String packageName) {
+        if (classes == null) {
+            synchronized (ClassScanner.class) {
+                if (classes == null) {
+                    classes = new HashSet<Class>();
+                    scanner(packageName, classes);
+                    // 初始化classMap
+                    classMap = new HashMap<String, Class<?>>();
+                    for (Class clazz : getClasses(packageName)) {
+                        classMap.put(clazz.getName(), clazz);
+                    }
+                }
+            }
+        }
+        return classes;
+    }
+
+    /**
+     * 扫描Class
+     *
+     * @param packageName
+     * @param classSet
+     */
+    public static void scanner(String packageName, Set<Class> classSet) {
+        String packageDirName = packageName.replaceAll("\\.", "/");
+        try {
+            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                // 判断是否是文件资源
+                if ("file".equalsIgnoreCase(url.getProtocol())) {
+                    System.out.println("url.getFile() = " + url.getFile());
+                    scanClassesInPackages(classSet, packageName, url.getFile(), true);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 扫描Class
+     *
+     * @param classSet
+     * @param packageName
+     * @param packageDirName
+     * @param recursive
+     */
+    private static void scanClassesInPackages(Set<Class> classSet, String packageName, String packageDirName, boolean recursive) {
+        File dir = new File(packageDirName);
+        if (dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                if (file.isFile()) {
+                    String className = file.getName().substring(0, file.getName().length() - 6);
+                    try {
+                        Class<?> loadClass = Thread.currentThread().getContextClassLoader().loadClass(packageName + '.' + className);
+                        classSet.add(loadClass);
+                        // 扫描Mapping
+                        GTRequestMapping annotation = loadClass.getAnnotation(GTRequestMapping.class);
+                        if (annotation != null) {
+                            for (Method method : loadClass.getDeclaredMethods()) {
+                                GTRequestMapping methodAnnotation = method.getAnnotation(GTRequestMapping.class);
+                                if (methodAnnotation != null) {
+                                    String mapping = annotation.value().startsWith("/") ? annotation.value() : annotation.value() + "/";
+                                    String value = methodAnnotation.value();
+                                    if (!"".equalsIgnoreCase(value.trim()) && !mapping.endsWith("/") && !value.startsWith("/")) {
+                                        mapping += "/" + value;
+                                    } else {
+                                        mapping += value;
+                                    }
+                                    GTHandlerMethodMapping.addMapping(mapping, method);
+                                }
+                            }
+                        }
+                    } catch (ClassNotFoundException e) {
+                        log.error("ClassNotFoundException", e);
+                    }
+                }
+                // 递归扫描
+                else if (file.isDirectory() && recursive) {
+                    scanClassesInPackages(classSet, packageName + "." + file.getName(), file.getPath(), recursive);
+                }
+            }
+        }
+    }
+
+}

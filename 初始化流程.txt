@@ -1,0 +1,8 @@
+根据传入的RootClass对象扫描该对象所在包及子包，获取所有的Class对象
+遍历扫描到的Class对象
+	判断Class对象是否有RequestMapping注解
+		有则继续扫描所有方法
+			判断方法是否有RequestMapping注解
+				有则保存Mapping和Method映射关系到HandlerMethodMapping的methodMapping中
+	创建对象实例并保存ClassName和实例的映射关系到BeanManager的beanMap中
+初始化完成，启动NettyServer服务
