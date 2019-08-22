@@ -54,7 +54,6 @@ public class ConfigurationParser {
      * @param clazz
      */
     public void scanConfiguration(Class<?> clazz) throws Exception {
-        log.info(">>>>>>>>>> 扫描配置类并注入参数 >>>>>>>>>>");
         Configuration annotation = clazz.getAnnotation(Configuration.class);
         if (annotation != null) {
             String prefix = annotation.value() + ".";
