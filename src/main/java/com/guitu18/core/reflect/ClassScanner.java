@@ -1,7 +1,7 @@
 package com.guitu18.core.reflect;
 
-import com.guitu18.GuituServer;
 import com.guitu18.common.config.WebConfig;
+import com.guitu18.common.exception.MyException;
 import com.guitu18.core.annonation.Autowired;
 import com.guitu18.core.annonation.RequestMapping;
 import com.guitu18.core.mapping.HandlerMethodMapping;
@@ -28,19 +28,20 @@ public class ClassScanner {
 
     private static final Logger log = Logger.getLogger(ClassScanner.class);
 
-    private static Set<Class> classes = null;
+    private static Set<Class<?>> classes = null;
 
     /**
      * 获取Class集合
      *
+     * @param clazz 启动类Class对象
      * @return Set<Class>
      */
-    public static Set<Class> getClasses() {
+    public static Set<Class<?>> getClasses(Class<?> clazz) {
         if (classes == null) {
             synchronized (ClassScanner.class) {
                 if (classes == null) {
                     classes = new HashSet<>();
-                    scanner(GuituServer.class.getPackage().getName(), classes);
+                    scanner(clazz.getPackage().getName(), classes);
                 }
             }
         }
@@ -50,7 +51,7 @@ public class ClassScanner {
     /**
      * 扫描Class
      */
-    public static void scanner(String packageName, Set<Class> classSet) {
+    public static void scanner(String packageName, Set<Class<?>> classSet) {
         String packageDirName = packageName.replaceAll("\\.", "/");
         try {
             Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
@@ -70,10 +71,13 @@ public class ClassScanner {
     /**
      * 递归扫描Class
      */
-    private static void scanClassInPackages(Set<Class> classSet, String packageName, String packageDirName, boolean recursive) {
+    private static void scanClassInPackages(Set<Class<?>> classSet, String packageName, String packageDirName, boolean recursive) {
         File dir = new File(packageDirName);
         if (dir.exists() && dir.isDirectory()) {
             File[] files = dir.listFiles();
+            if (files == null) {
+                throw new MyException("Class file not found.");
+            }
             for (File file : files) {
                 if (file.isFile()) {
                     String className = file.getName().substring(0, file.getName().length() - 6);

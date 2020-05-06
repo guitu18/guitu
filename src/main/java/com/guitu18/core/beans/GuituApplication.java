@@ -1,9 +1,12 @@
 package com.guitu18.core.beans;
 
 import com.guitu18.core.annonation.Autowired;
+import com.guitu18.core.bootstrap.NettyBootstrap;
 import com.guitu18.core.interceptor.HandlerInterceptor;
 import com.guitu18.core.reflect.ClassScanner;
 import com.guitu18.core.reflect.ConfigurationParser;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Field;
@@ -18,15 +21,24 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhangkuan
  * @date 2019/8/19
  */
-public class ApplicationContext {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class GuituApplication {
 
     private final Logger log = Logger.getLogger(this.getClass());
 
-    private static ApplicationContext applicationContext;
+    private static GuituApplication guituApplication;
 
     private static final Map<String, Object> BEAN_MAP = new ConcurrentHashMap<>();
 
-    private ApplicationContext() {
+    /**
+     * 启动服务
+     *
+     * @param clazz 启动类Class对象
+     * @param args  启动参数
+     */
+    public static void run(Class<?> clazz, String[] args) {
+        GuituApplication.getInstance().init(clazz);
+        NettyBootstrap.start(args);
     }
 
     /**
@@ -34,28 +46,30 @@ public class ApplicationContext {
      *
      * @return ApplicationContext
      */
-    public static ApplicationContext getInstance() {
-        if (applicationContext == null) {
-            synchronized (ApplicationContext.class) {
-                if (applicationContext == null) {
-                    applicationContext = new ApplicationContext();
+    public static GuituApplication getInstance() {
+        if (guituApplication == null) {
+            synchronized (GuituApplication.class) {
+                if (guituApplication == null) {
+                    guituApplication = new GuituApplication();
                 }
             }
         }
-        return applicationContext;
+        return guituApplication;
     }
 
     /**
      * 初始化IOC容器
+     *
+     * @param clazz 启动类Class对象
      */
-    public void init() {
+    public void init(Class<?> clazz) {
         log.info(">>>>>>>>>>>>> ApplicationContext.init()... >>>>>>>>>>>>>");
-        for (Class clazz : ClassScanner.getClasses()) {
+        for (Class<?> sClazz : ClassScanner.getClasses(clazz)) {
             try {
                 // 扫描HandlerMapping映射
-                ClassScanner.scanHandlerMapping(clazz);
+                ClassScanner.scanHandlerMapping(sClazz);
                 // 初始化并保存实例映射
-                BEAN_MAP.put(clazz.getName(), clazz.newInstance());
+                BEAN_MAP.put(sClazz.getName(), sClazz.newInstance());
             } catch (Exception ignored) {
             }
         }

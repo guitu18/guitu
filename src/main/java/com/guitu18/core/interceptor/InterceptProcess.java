@@ -1,6 +1,6 @@
 package com.guitu18.core.interceptor;
 
-import com.guitu18.core.beans.ApplicationContext;
+import com.guitu18.core.beans.GuituApplication;
 import com.guitu18.core.thread.ThreadLocalRequestHolder;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class InterceptProcess {
      */
     private InterceptProcess() {
         // 从IOC容器中获取所有过滤器
-        interceptors = ApplicationContext.getInstance().getHandlerInterceptor();
+        interceptors = GuituApplication.getInstance().getHandlerInterceptor();
     }
 
     /**

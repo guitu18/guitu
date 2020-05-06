@@ -2,7 +2,7 @@ package com.guitu18.core.reflect;
 
 import com.guitu18.common.utils.CommonUtils;
 import com.guitu18.core.annonation.Configuration;
-import com.guitu18.core.beans.ApplicationContext;
+import com.guitu18.core.beans.GuituApplication;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class ConfigurationParser {
                         ConfigurationParser.PROPERTIES.get(prefix + name));
                 if (value != null) {
                     field.setAccessible(true);
-                    field.set(ApplicationContext.getInstance().getBean(clazz.getName()), value);
+                    field.set(GuituApplication.getInstance().getBean(clazz.getName()), value);
                 }
             }
         }

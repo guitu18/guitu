@@ -11,6 +11,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.log4j.Logger;
 
+import java.util.Arrays;
+
 /**
  * NettyBootstrap
  *
@@ -26,8 +28,11 @@ public class NettyBootstrap {
 
     /**
      * 服务启动
+     *
+     * @param args 启动参数
      */
-    public static void start() {
+    public static void start(String[] args) {
+        log.info("Netty 启动，参数：" + Arrays.toString(args));
         // 用来接收进来的连接
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         // 用来处理已经被接收的连接
@@ -43,9 +48,16 @@ public class NettyBootstrap {
                     // 添加自己的Handler
                     .childHandler(new ChannelInitializer());
 
+            // 获取启动参数
+            int serverPort = webConfig.getServerPort();
+            for (String arg : args) {
+                if (arg.startsWith("server.port=")) {
+                    serverPort = Integer.parseInt(arg.substring(arg.indexOf("=")));
+                }
+            }
             // 绑定端口，开始接收进来的连接
-            ChannelFuture channelFuture = serverBootstrap.bind(webConfig.getServerPort()).sync();
-            log.info(">>>>>>>>>> 服务已启动，运行端口：" + webConfig.getServerPort() + " >>>>>>>>>>");
+            ChannelFuture channelFuture = serverBootstrap.bind(serverPort).sync();
+            log.info(">>>>>>>>>> 服务已启动，运行端口：" + serverPort + " >>>>>>>>>>");
 
             // 等待服务器socket关闭
             channelFuture.channel().closeFuture().sync();

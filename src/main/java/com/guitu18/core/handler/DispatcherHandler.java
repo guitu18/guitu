@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.guitu18.common.exception.MyException;
 import com.guitu18.common.utils.CommonUtils;
 import com.guitu18.common.utils.JsonResult;
-import com.guitu18.core.beans.ApplicationContext;
+import com.guitu18.core.beans.GuituApplication;
 import com.guitu18.core.http.Request;
 import com.guitu18.core.interceptor.InterceptProcess;
 import com.guitu18.core.mapping.HandlerMethodMapping;
@@ -41,7 +41,7 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
             // 获取Handler
             Method method = getHandler();
             // 获取实例
-            Object instance = ApplicationContext.getInstance().getBean(method.getDeclaringClass());
+            Object instance = GuituApplication.getInstance().getBean(method.getDeclaringClass());
             // 从请求参数中获取Method需要的参数
             Object[] args = getMethodArgs(method);
             Object invoke;
