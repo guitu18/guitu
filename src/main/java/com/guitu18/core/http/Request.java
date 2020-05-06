@@ -3,7 +3,7 @@ package com.guitu18.core.http;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.guitu18.common.utils.Constants;
-import com.guitu18.core.thread.ThreadLocalHolder;
+import com.guitu18.core.thread.ThreadLocalRequestHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -43,7 +43,7 @@ public class Request {
     /**
      * 包装Request信息
      *
-     * @param fullHttpRequest
+     * @param fullHttpRequest FullHttpRequest
      */
     public Request(FullHttpRequest fullHttpRequest) throws UnsupportedEncodingException {
         this.httpVersion = fullHttpRequest.protocolVersion().toString();
@@ -57,14 +57,14 @@ public class Request {
         // 解析请求参数
         parseParameter(fullHttpRequest);
         // 添加为本地线程变量
-        ThreadLocalHolder.set(this);
+        ThreadLocalRequestHolder.set(this);
     }
 
 
     /**
      * 解析Header
      *
-     * @param request
+     * @param request FullHttpRequest
      */
     private void parseHeaders(FullHttpRequest request) {
         for (Map.Entry<String, String> header : request.headers()) {
@@ -84,9 +84,7 @@ public class Request {
     /**
      * 解析请求参数
      *
-     * @param fullHttpRequest
-     * @return
-     * @throws UnsupportedEncodingException
+     * @param fullHttpRequest FullHttpRequest
      */
     private void parseParameter(FullHttpRequest fullHttpRequest) throws UnsupportedEncodingException {
         // GET请求

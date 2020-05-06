@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 @RequestMapping
 public class IndexController {
 
-    private Logger log = Logger.getLogger(this.getClass());
+    private final Logger log = Logger.getLogger(this.getClass());
 
     @Autowired
     private UserService userService;
@@ -25,11 +25,11 @@ public class IndexController {
     @RequestMapping
     public JsonResult index() {
         log.info(">>>>>>>>>>>>>>> IndexController.index() >>>>>>>>>>>>>>>");
-        return JsonResult.ok();
+        return JsonResult.ok("IndexController.index()");
     }
 
     @RequestMapping("login")
-    public JsonResult login(String username, String password, Integer age, int[] like) {
+    public JsonResult login(String username, String password) {
         log.info(">>>>>>>>>>>>>>> IndexController.login() >>>>>>>>>>>>>>>");
         User user = userService.getByUserName(username);
         if (user == null || !user.getPassword().equals(password)) {

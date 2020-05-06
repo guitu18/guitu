@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.guitu18.common.exception.MyException;
 import com.guitu18.common.utils.CommonUtils;
 import com.guitu18.common.utils.JsonResult;
-import com.guitu18.core.beans.BeanManager;
+import com.guitu18.core.beans.ApplicationContext;
 import com.guitu18.core.http.Request;
 import com.guitu18.core.interceptor.InterceptProcess;
 import com.guitu18.core.mapping.HandlerMethodMapping;
-import com.guitu18.core.thread.ThreadLocalHolder;
+import com.guitu18.core.thread.ThreadLocalRequestHolder;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,26 +22,26 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
- * 前端控制器DispatcherHandler
+ * 前端控制器DispatcherHandler，模仿Spring中同名的前端控制器
  *
  * @author zhangkuan
  * @date 2019/8/19
  */
 public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private Logger log = Logger.getLogger(this.getClass());
+    private final Logger log = Logger.getLogger(this.getClass());
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, FullHttpRequest fullHttpRequest) throws Exception {
         log.info(fullHttpRequest.method().name() + " " + fullHttpRequest.uri() + " " + fullHttpRequest.protocolVersion().toString());
-        // 包装Request
+        // 包装Request，这里已经不需要用到了，但必须初始化，在Request构造方法中将其放入本地线程中
         Request request = new Request(fullHttpRequest);
         // 执行前置拦截器
         if (InterceptProcess.getInstance().processBefore()) {
             // 获取Handler
             Method method = getHandler();
             // 获取实例
-            Object instance = BeanManager.getInstance().getBean(method.getDeclaringClass());
+            Object instance = ApplicationContext.getInstance().getBean(method.getDeclaringClass());
             // 从请求参数中获取Method需要的参数
             Object[] args = getMethodArgs(method);
             Object invoke;
@@ -60,12 +60,11 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 根据请求路径获取处理器
      *
-     * @return
-     * @throws MyException
+     * @return Method
      */
     private Method getHandler() throws MyException {
         // 获取请求路径
-        String mapping = ThreadLocalHolder.get().getUri();
+        String mapping = ThreadLocalRequestHolder.get().getUri();
         if (mapping.contains("?")) {
             mapping = mapping.substring(0, mapping.indexOf("?"));
         }
@@ -75,10 +74,9 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 从请求参数中获取Method需要的参数
      *
-     * @param method
-     * @throws Exception
+     * @param method Method
      */
-    private Object[] getMethodArgs(Method method) throws Exception {
+    private Object[] getMethodArgs(Method method) {
         Parameter[] parameters = method.getParameters();
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameters.length == 0) {
@@ -86,7 +84,7 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
         }
         // 获取请求参数并注入到方法形参
         Object[] args = new Object[parameters.length];
-        Request request = ThreadLocalHolder.get();
+        Request request = ThreadLocalRequestHolder.get();
         for (int i = 0; i < parameters.length; i++) {
             List<String> list = request.getParameters().get(parameters[i].getName());
             Class<?> type = parameterTypes[i];
@@ -102,9 +100,9 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 响应请求
      *
-     * @param context
-     * @param status
-     * @param result
+     * @param context ChannelHandlerContext
+     * @param status  状态码
+     * @param result  返回内容
      */
     private void response(ChannelHandlerContext context, HttpResponseStatus status, JsonResult result) {
         response(context, status, JSONObject.toJSONString(result));
@@ -113,9 +111,9 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 响应请求
      *
-     * @param context
-     * @param status
-     * @param result
+     * @param context ChannelHandlerContext
+     * @param status  状态码
+     * @param result  返回内容
      */
     private void response(ChannelHandlerContext context, HttpResponseStatus status, String result) {
         // 创建http响应
@@ -130,9 +128,8 @@ public class DispatcherHandler extends SimpleChannelInboundHandler<FullHttpReque
     /**
      * 异常处理
      *
-     * @param ctx
-     * @param cause
-     * @throws Exception
+     * @param ctx   ChannelHandlerContext
+     * @param cause Throwable
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {

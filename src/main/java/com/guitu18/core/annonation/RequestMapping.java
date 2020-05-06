@@ -3,7 +3,7 @@ package com.guitu18.core.annonation;
 import java.lang.annotation.*;
 
 /**
- * RequestMapping
+ * RequestMapping，模仿Spring，用法跟Spring一致
  *
  * @author zhangkuan
  * @date 2019/8/19
@@ -14,9 +14,7 @@ import java.lang.annotation.*;
 public @interface RequestMapping {
 
     /**
-     * Mapping
-     *
-     * @return
+     * 映射路径
      */
     String value() default "";
 

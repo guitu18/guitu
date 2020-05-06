@@ -1,6 +1,6 @@
 package com.guitu18;
 
-import com.guitu18.core.beans.BeanManager;
+import com.guitu18.core.beans.ApplicationContext;
 import com.guitu18.core.bootstrap.NettyBootstrap;
 
 /**
@@ -9,22 +9,20 @@ import com.guitu18.core.bootstrap.NettyBootstrap;
  * @author zhangkuan
  * @date 2019/8/19
  */
-public class MyServer {
+public class GuituServer {
 
     /**
      * Main
-     *
-     * @param args
      */
     public static void main(String[] args) {
-        new MyServer().start();
+        new GuituServer().run();
     }
 
     /**
      * 启动服务
      */
-    public void start() {
-        BeanManager.getInstance().init();
+    public void run() {
+        ApplicationContext.getInstance().init();
         NettyBootstrap.start();
     }
 

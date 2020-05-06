@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * HandlerMethodMapping
+ * HandlerMethodMapping，模仿Spring中的处理器映射器 HandlerMethodMapping，用法一致
  *
  * @author zhangkuan
  * @date 2019/8/19
@@ -16,7 +16,7 @@ public class HandlerMethodMapping {
 
     private static HandlerMethodMapping handlerMethodMapping = null;
 
-    private Map<String, Method> methodMapping = new ConcurrentHashMap<>();
+    private final Map<String, Method> methodMapping = new ConcurrentHashMap<>();
 
     private HandlerMethodMapping() {
     }
@@ -24,7 +24,7 @@ public class HandlerMethodMapping {
     /**
      * 获取单例实例
      *
-     * @return
+     * @return HandlerMethodMapping
      */
     public static HandlerMethodMapping getInstance() {
         if (handlerMethodMapping == null) {
@@ -40,12 +40,12 @@ public class HandlerMethodMapping {
     /**
      * 获取处理器（Method）
      *
-     * @param mapping
-     * @return
-     * @throws MyException
+     * @param mapping 路径
+     * @return Method
      */
     public Method getMethod(String mapping) throws MyException {
-        Method method = methodMapping.get(mappingTrim(mapping));
+        mapping = mappingTrim(mapping);
+        Method method = methodMapping.get(mapping.equals("") ? "/" : mapping);
         if (method == null) {
             throw new MyException("MethodMapping not found: " + mapping);
         }
@@ -55,8 +55,8 @@ public class HandlerMethodMapping {
     /**
      * 添加映射
      *
-     * @param mapping
-     * @param method
+     * @param mapping 路径
+     * @param method  方法
      */
     public void addMapping(String mapping, Method method) {
         methodMapping.put(mapping, method);
@@ -65,8 +65,8 @@ public class HandlerMethodMapping {
     /**
      * 过滤mapping
      *
-     * @param mapping
-     * @return
+     * @param mapping 路径
+     * @return String
      */
     public static String mappingTrim(String mapping) {
         mapping = mapping.trim();

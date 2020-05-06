@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * JsonResult
+ *
  * @author zhangkuan
  * @date 2019/8/19
  */

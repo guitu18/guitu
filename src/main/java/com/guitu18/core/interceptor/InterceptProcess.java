@@ -1,12 +1,12 @@
 package com.guitu18.core.interceptor;
 
-import com.guitu18.core.beans.BeanManager;
-import com.guitu18.core.thread.ThreadLocalHolder;
+import com.guitu18.core.beans.ApplicationContext;
+import com.guitu18.core.thread.ThreadLocalRequestHolder;
 
 import java.util.List;
 
 /**
- * InterceptProcess
+ * InterceptProcess，模仿Spring的InterceptProcess
  *
  * @author zhangkuan
  * @date 2019/8/20
@@ -17,17 +17,20 @@ public class InterceptProcess {
 
     private static List<HandlerInterceptor> interceptors;
 
+    /**
+     * 私有构造方法
+     */
     private InterceptProcess() {
-        interceptors = BeanManager.getInstance().getHandlerInterceptor();
+        // 从IOC容器中获取所有过滤器
+        interceptors = ApplicationContext.getInstance().getHandlerInterceptor();
     }
 
     /**
      * 单例实例
      *
-     * @return
+     * @return InterceptProcess
      */
     public static InterceptProcess getInstance() {
-        interceptProcess = new InterceptProcess();
         if (interceptProcess == null) {
             synchronized (InterceptProcess.class) {
                 if (interceptProcess == null) {
@@ -40,13 +43,10 @@ public class InterceptProcess {
 
     /**
      * 执行前置拦截器
-     *
-     * @return
-     * @throws Exception
      */
     public boolean processBefore() throws Exception {
         for (HandlerInterceptor interceptor : interceptors) {
-            if (!interceptor.before(ThreadLocalHolder.get())) {
+            if (!interceptor.before(ThreadLocalRequestHolder.get())) {
                 return false;
             }
         }
@@ -55,12 +55,10 @@ public class InterceptProcess {
 
     /**
      * 执行后置拦截器
-     *
-     * @throws Exception
      */
     public void processAfter() throws Exception {
         for (HandlerInterceptor interceptor : interceptors) {
-            interceptor.after(ThreadLocalHolder.get());
+            interceptor.after(ThreadLocalRequestHolder.get());
         }
     }
 
