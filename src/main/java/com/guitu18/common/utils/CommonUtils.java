@@ -24,10 +24,10 @@ public class CommonUtils {
     }
 
     /**
-     * 是否是Java基础类，代码参考EasyPOI
+     * 是否是Java基础类，此处代码参考了 EasyPOI源码
      *
-     * @param clazz
-     * @return
+     * @param clazz 类的class对象
+     * @return 是基础类型返回true，否则返回false
      */
     public static boolean isJavaClass(Class<?> clazz) {
         boolean isBaseClass = false;
@@ -44,11 +44,11 @@ public class CommonUtils {
     }
 
     /**
-     * 根据类型获取值，代码参考EasyPOI
+     * 根据类型获取值，此处代码参考了 EasyPOI源码
      *
-     * @param classFullName
-     * @param obj
-     * @return
+     * @param classFullName 类全名
+     * @param obj           obj对象
+     * @return 根据类型转换后的值
      */
     public static Object getValueByType(String classFullName, Object obj) {
         try {

@@ -1,6 +1,6 @@
 package com.guitu18.core.reflect;
 
-import com.guitu18.MyServer;
+import com.guitu18.GuituServer;
 import com.guitu18.common.config.WebConfig;
 import com.guitu18.core.annonation.Autowired;
 import com.guitu18.core.annonation.RequestMapping;
@@ -26,21 +26,21 @@ public class ClassScanner {
     @Autowired
     private static WebConfig webConfig;
 
-    private static Logger log = Logger.getLogger(ClassScanner.class);
+    private static final Logger log = Logger.getLogger(ClassScanner.class);
 
     private static Set<Class> classes = null;
 
     /**
      * 获取Class集合
      *
-     * @return
+     * @return Set<Class>
      */
     public static Set<Class> getClasses() {
         if (classes == null) {
             synchronized (ClassScanner.class) {
                 if (classes == null) {
                     classes = new HashSet<>();
-                    scanner(MyServer.class.getPackage().getName(), classes);
+                    scanner(GuituServer.class.getPackage().getName(), classes);
                 }
             }
         }
@@ -49,9 +49,6 @@ public class ClassScanner {
 
     /**
      * 扫描Class
-     *
-     * @param packageName
-     * @param classSet
      */
     public static void scanner(String packageName, Set<Class> classSet) {
         String packageDirName = packageName.replaceAll("\\.", "/");
@@ -71,12 +68,7 @@ public class ClassScanner {
     }
 
     /**
-     * 扫描Class
-     *
-     * @param classSet
-     * @param packageName
-     * @param packageDirName
-     * @param recursive
+     * 递归扫描Class
      */
     private static void scanClassInPackages(Set<Class> classSet, String packageName, String packageDirName, boolean recursive) {
         File dir = new File(packageDirName);
@@ -102,10 +94,9 @@ public class ClassScanner {
     /**
      * 扫描RequestMapping
      *
-     * @param clazz
+     * @param clazz 扫描的类的Class对象
      */
     public static void scanHandlerMapping(Class<?> clazz) {
-        // 扫描Mapping
         RequestMapping annotation = clazz.getAnnotation(RequestMapping.class);
         if (annotation != null) {
             for (Method method : clazz.getDeclaredMethods()) {
@@ -113,7 +104,8 @@ public class ClassScanner {
                 if (methodAnnotation != null) {
                     String mapping1 = HandlerMethodMapping.mappingTrim(annotation.value());
                     String mapping2 = HandlerMethodMapping.mappingTrim(methodAnnotation.value());
-                    HandlerMethodMapping.getInstance().addMapping(mapping1 + mapping2, method);
+                    String mapping = (mapping1 + mapping2).equals("") ? "/" : mapping1 + mapping2;
+                    HandlerMethodMapping.getInstance().addMapping(mapping, method);
                 }
             }
         }

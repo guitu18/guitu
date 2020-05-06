@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
  */
 public class MyInterceptor implements HandlerInterceptor {
 
-    private Logger log = Logger.getLogger(this.getClass());
+    private final Logger log = Logger.getLogger(this.getClass());
 
     @Override
     public boolean before(Request request) throws Exception {

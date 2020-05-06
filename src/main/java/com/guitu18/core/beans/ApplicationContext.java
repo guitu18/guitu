@@ -13,49 +13,49 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * BeanManager
+ * ApplicationContext，模仿Spring的IOC容器
  *
  * @author zhangkuan
  * @date 2019/8/19
  */
-public class BeanManager {
+public class ApplicationContext {
 
-    private Logger log = Logger.getLogger(this.getClass());
+    private final Logger log = Logger.getLogger(this.getClass());
 
-    private static BeanManager beanManager;
+    private static ApplicationContext applicationContext;
 
-    private static Map<String, Object> beanMap = new ConcurrentHashMap<>();
+    private static final Map<String, Object> BEAN_MAP = new ConcurrentHashMap<>();
 
-    private BeanManager() {
+    private ApplicationContext() {
     }
 
     /**
-     * 获取BeanManager单例实例
+     * 获取ApplicationContext单例实例
      *
-     * @return
+     * @return ApplicationContext
      */
-    public static BeanManager getInstance() {
-        if (beanManager == null) {
-            synchronized (BeanManager.class) {
-                if (beanManager == null) {
-                    beanManager = new BeanManager();
+    public static ApplicationContext getInstance() {
+        if (applicationContext == null) {
+            synchronized (ApplicationContext.class) {
+                if (applicationContext == null) {
+                    applicationContext = new ApplicationContext();
                 }
             }
         }
-        return beanManager;
+        return applicationContext;
     }
 
     /**
      * 初始化IOC容器
      */
     public void init() {
-        log.info(">>>>>>>>>>>>> BeanManager.init()... >>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>> ApplicationContext.init()... >>>>>>>>>>>>>");
         for (Class clazz : ClassScanner.getClasses()) {
             try {
                 // 扫描HandlerMapping映射
                 ClassScanner.scanHandlerMapping(clazz);
                 // 初始化并保存实例映射
-                beanMap.put(clazz.getName(), clazz.newInstance());
+                BEAN_MAP.put(clazz.getName(), clazz.newInstance());
             } catch (Exception ignored) {
             }
         }
@@ -68,11 +68,9 @@ public class BeanManager {
 
     /**
      * 执行自动注入
-     *
-     * @throws Exception
      */
     private void executeAutowired() throws Exception {
-        for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : BEAN_MAP.entrySet()) {
             // 扫描配置类
             Class<?> clazz = entry.getValue().getClass();
             ConfigurationParser.getInstance().scanConfiguration(clazz);
@@ -80,7 +78,7 @@ public class BeanManager {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 if (field.getAnnotation(Autowired.class) != null) {
-                    Object obj = beanMap.get(field.getType().getName());
+                    Object obj = BEAN_MAP.get(field.getType().getName());
                     if (obj != null) {
                         field.setAccessible(true);
                         field.set(entry.getValue(), obj);
@@ -93,21 +91,16 @@ public class BeanManager {
     /**
      * 根据名称获取Bean
      *
-     * @param name
-     * @return
-     * @throws Exception
+     * @param name Bean名称
      */
     public Object getBean(String name) throws Exception {
-        return beanMap.get(name);
+        return BEAN_MAP.get(name);
     }
 
     /**
      * 根据类型获取Bean
      *
-     * @param clazz
-     * @param <T>
-     * @return
-     * @throws Exception
+     * @param clazz Bean的Class对象
      */
     public <T> T getBean(Class<T> clazz) throws Exception {
         return (T) getBean(clazz.getName());
@@ -115,14 +108,12 @@ public class BeanManager {
 
 
     /**
-     * 获取拦截器
-     *
-     * @return
+     * 获取拦截器，所有实现 {@link HandlerInterceptor} 接口的拦截器
      */
     public List<HandlerInterceptor> getHandlerInterceptor() {
-        log.info(">>>>>>>>>>>>> BeanManager.getHandlerInterceptor()... >>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>> ApplicationContext.getHandlerInterceptor()... >>>>>>>>>>>>>");
         List<HandlerInterceptor> interceptors = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : beanMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : BEAN_MAP.entrySet()) {
             if (entry.getValue() instanceof HandlerInterceptor) {
                 interceptors.add((HandlerInterceptor) entry.getValue());
             }

@@ -4,19 +4,19 @@ import com.guitu18.core.http.Request;
 import io.netty.util.concurrent.FastThreadLocal;
 
 /**
- * ThreadLocalHolder
+ * ThreadLocalRequestHolder
  *
  * @author zhangkuan
  * @date 2019/8/20
  */
-public class ThreadLocalHolder {
+public class ThreadLocalRequestHolder {
 
     private static final FastThreadLocal<Request> THREAD_LOCAL = new FastThreadLocal<>();
 
     /**
      * 保存Request实例
      *
-     * @param request
+     * @param request Request
      */
     public static void set(Request request) {
         THREAD_LOCAL.set(request);
@@ -25,7 +25,7 @@ public class ThreadLocalHolder {
     /**
      * 获取Request实例
      *
-     * @return
+     * @return Request
      */
     public static Request get() {
         return THREAD_LOCAL.get();

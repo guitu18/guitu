@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class NettyBootstrap {
 
-    private static Logger log = Logger.getLogger(NettyBootstrap.class);
+    private static final Logger log = Logger.getLogger(NettyBootstrap.class);
 
     @Autowired
     private static WebConfig webConfig;
