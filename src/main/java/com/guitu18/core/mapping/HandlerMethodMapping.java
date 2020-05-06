@@ -47,7 +47,7 @@ public class HandlerMethodMapping {
     public Method getMethod(String mapping) throws MyException {
         Method method = methodMapping.get(mappingTrim(mapping));
         if (method == null) {
-            throw new MyException("MethodMapping not fund: " + mapping);
+            throw new MyException("MethodMapping not found: " + mapping);
         }
         return method;
     }
